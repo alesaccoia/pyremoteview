@@ -92,6 +92,7 @@ python remote_gallery.py --remote-host remoteserver --remote-path /path/to/image
 - `--host HOST`: Host to run the server on (default: 0.0.0.0)
 - `--remote-host REMOTE_HOST`: Remote host to fetch images from
 - `--remote-path REMOTE_PATH`: Path on remote host to browse
+- `--proxy-path PROXY_PATH`: Base path when accessed through a reverse proxy (e.g., "/sd_preview")
 
 ### Serving Local Files
 
@@ -99,6 +100,27 @@ To browse images on your local machine, use `localhost` as the remote host:
 
 ```
 python remote_gallery.py --remote-host localhost --remote-path /path/to/local/images
+```
+
+### Using with a Reverse Proxy
+
+If you're accessing PyRemoteView through a reverse proxy (e.g., Nginx), use the `--proxy-path` argument:
+
+```
+pyremoteview --remote-host remoteserver --remote-path /path/to/images --proxy-path="/your_proxy_path"
+```
+
+Example Nginx configuration:
+
+```nginx
+location /your_proxy_path/ {
+    proxy_pass http://localhost:8080/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
 ```
 
 ## Web Interface

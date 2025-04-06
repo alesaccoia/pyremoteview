@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pyremoteview",
-    version="1.0.1",
+    version="1.0.2",
     description="Remote SSH or Local Image Gallery Viewer",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

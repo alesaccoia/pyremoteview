@@ -148,7 +148,7 @@
     <div class="gallery">
         {% if parent is not none %}
         <div class="folder">
-            <a href="/browse/{{ parent|relpath(remote_path) if parent != remote_path else '' }}">
+            <a href="{{ proxy_path }}/browse/{{ parent|relpath(remote_path) if parent != remote_path else '' }}">
                 <span class="folder-icon">📁</span> ..
             </a>
         </div>
@@ -157,7 +157,7 @@
         {% for name, path in directories %}
         {% if path %}
         <div class="folder">
-            <a href="/browse/{{ path|relpath(remote_path) }}">
+            <a href="{{ proxy_path }}/browse/{{ path|relpath(remote_path) }}">
                 <span class="folder-icon">📁</span> {{ name }}
             </a>
         </div>
@@ -166,9 +166,9 @@
         
         {% for name, path in files %}
         {% if path %}
-        <div class="image-container" data-path="{{ path|relpath(remote_path) }}">
+        <div class="image-container" data-path="{{ path|basename }}">
             <a href="#" class="image-link">
-                <img src="/thumbnail/{{ path|relpath(remote_path) }}" alt="{{ name }}" loading="lazy">
+                <img src="{{ proxy_path }}/thumbnail/{{ path|basename }}" alt="{{ name }}" loading="lazy">
                 <div class="image-name">{{ name }}</div>
             </a>
         </div>
@@ -194,6 +194,7 @@
             const nextBtn = document.getElementById('next');
             const imageContainers = document.querySelectorAll('.image-container');
             let currentIndex = 0;
+            const proxyPath = "{{ proxy_path }}"; 
             
             // Open lightbox
             document.querySelectorAll('.image-link').forEach((link, index) => {
@@ -201,7 +202,7 @@
                     e.preventDefault();
                     currentIndex = index;
                     const path = this.parentElement.dataset.path;
-                    lightboxImg.src = `/image/${path}`;
+                    lightboxImg.src = `${proxyPath}/image/${path}`;
                     lightbox.style.display = 'flex';
                 });
             });
@@ -222,13 +223,13 @@
             prevBtn.addEventListener('click', function() {
                 currentIndex = (currentIndex - 1 + imageContainers.length) % imageContainers.length;
                 const path = imageContainers[currentIndex].dataset.path;
-                lightboxImg.src = `/image/${path}`;
+                lightboxImg.src = `${proxyPath}/image/${path}`;
             });
             
             nextBtn.addEventListener('click', function() {
                 currentIndex = (currentIndex + 1) % imageContainers.length;
                 const path = imageContainers[currentIndex].dataset.path;
-                lightboxImg.src = `/image/${path}`;
+                lightboxImg.src = `${proxyPath}/image/${path}`;
             });
             
             // Keyboard navigation

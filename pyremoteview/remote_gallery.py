@@ -48,6 +48,7 @@ app = Flask(__name__, template_folder='templates')
 # Global variables for remote path info
 remote_host = DEFAULT_REMOTE_HOST
 remote_path = DEFAULT_REMOTE_PATH
+proxy_path = ""  # Default to empty string
 
 # Cache for directory listings
 directory_cache = {}
@@ -331,7 +332,8 @@ def browse(subpath=None):
             current_path=path,
             rel_path=rel_path,
             parent=parent,
-            remote_host=remote_host
+            remote_host=remote_host,
+            proxy_path=proxy_path
         )
     except Exception as e:
         # Log the error and show a basic error page
@@ -667,14 +669,20 @@ def parse_args():
     parser.add_argument('--host', default=DEFAULT_HOST, help='Host to run the server on')
     parser.add_argument('--remote-host', default=DEFAULT_REMOTE_HOST, help='Remote host to fetch images from')
     parser.add_argument('--remote-path', default=DEFAULT_REMOTE_PATH, help='Path on remote host to browse')
+    parser.add_argument('--proxy-path', default='', help='Base path when accessed through a reverse proxy (example: /sd_preview)')
     return parser.parse_args()
 
 def main():
     args = parse_args()
     
-    global remote_host, remote_path
+    global remote_host, remote_path, proxy_path
     remote_host = args.remote_host
     remote_path = args.remote_path
+    proxy_path = args.proxy_path.rstrip('/')
+    if proxy_path != "":
+        proxy_path = "/" + proxy_path
+
+    get_thumbnail_path.cache_clear()
     
     # Verify connection to remote host
     try:
