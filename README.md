@@ -25,10 +25,28 @@ PyRemoteView is a web-based application that allows you to remotely browse and v
 
 ## Installation
 
+### Install from PyPI (Recommended)
+
+You can install PyRemoteView directly from PyPI using pip:
+
+```
+pip install pyremoteview
+```
+
+This will install all required dependencies automatically.
+
+### Manual Installation
+
+If you prefer to install from source:
+
 1. Clone or download this repository
 2. Install required packages:
    ```
-   pip install flask pillow
+   pip install -r requirements.txt
+   ```
+3. Install the package:
+   ```
+   pip install .
    ```
 
 ## Setting Up Passwordless SSH
@@ -102,7 +120,7 @@ http://localhost:8080/debug
 ## Caching
 
 The application caches thumbnails and recently viewed images in:
-- `~/.cache/pyremotegallery/thumbnails`
-- `~/.cache/pyremotegallery/images`
+- `~/.cache/pyremoteview/thumbnails`
+- `~/.cache/pyremoteview/images`
 
 To clear the cache, use the "Clear Cache" button in the web interface or delete these directories.
