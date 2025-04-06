@@ -4,7 +4,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyremoteview)](https://pypi.org/project/pyremoteview/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-PyRemoteView is a web-based application that allows you to remotely browse and view images stored on another server via SSH, with automatic thumbnail generation and caching for improved performance.
+PyRemoteView is a web-based application that allows you to remotely browse and view images stored locally or on another server via SSH, with automatic thumbnail generation and caching for improved performance.
 
 ## Features
 
