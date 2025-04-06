@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Remote Image Gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .breadcrumbs {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-gap: 15px;
+        }
+        .folder, .image-container {
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .folder:hover, .image-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .folder a, .image-container a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        .folder-icon {
+            margin-right: 10px;
+            color: #FFC107;
+        }
+        .image-container {
+            text-align: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .image-name {
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .action-bar {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 30px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .nav-arrows {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .nav-arrow {
+            font-size: 50px;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+        }
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="action-bar">
+        <h1>Remote Gallery: {{ remote_host }}</h1>
+        <a href="/clear-cache" class="btn">Clear Cache</a>
+    </div>
+    
+    <div class="breadcrumbs">
+        <a href="/">Home</a>
+        {% if rel_path %}
+            {% set parts = rel_path.split('/') %}
+            {% set current = '' %}
+            {% for part in parts if part %}
+                {% set current = current + '/' + part %}
+                / <a href="/browse{{ current }}">{{ part }}</a>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <div class="gallery">
+        {% if parent is not none %}
+        <div class="folder">
+            <a href="/browse/{{ parent|relpath(remote_path) if parent != remote_path else '' }}">
+                <span class="folder-icon">📁</span> ..
+            </a>
+        </div>
+        {% endif %}
+        
+        {% for name, path in directories %}
+        {% if path %}
+        <div class="folder">
+            <a href="/browse/{{ path|relpath(remote_path) }}">
+                <span class="folder-icon">📁</span> {{ name }}
+            </a>
+        </div>
+        {% endif %}
+        {% endfor %}
+        
+        {% for name, path in files %}
+        {% if path %}
+        <div class="image-container" data-path="{{ path|relpath(remote_path) }}">
+            <a href="#" class="image-link">
+                <img src="/thumbnail/{{ path|relpath(remote_path) }}" alt="{{ name }}" loading="lazy">
+                <div class="image-name">{{ name }}</div>
+            </a>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <div class="nav-arrows">
+            <span class="nav-arrow" id="prev">&#10094;</span>
+            <span class="nav-arrow" id="next">&#10095;</span>
+        </div>
+        <img class="lightbox-content" id="lightbox-img">
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const closeBtn = document.querySelector('.lightbox-close');
+            const prevBtn = document.getElementById('prev');
+            const nextBtn = document.getElementById('next');
+            const imageContainers = document.querySelectorAll('.image-container');
+            let currentIndex = 0;
+            
+            // Open lightbox
+            document.querySelectorAll('.image-link').forEach((link, index) => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    currentIndex = index;
+                    const path = this.parentElement.dataset.path;
+                    lightboxImg.src = `/image/${path}`;
+                    lightbox.style.display = 'flex';
+                });
+            });
+            
+            // Close lightbox
+            closeBtn.addEventListener('click', function() {
+                lightbox.style.display = 'none';
+            });
+            
+            // Close lightbox when clicking outside the image
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    lightbox.style.display = 'none';
+                }
+            });
+            
+            // Navigation
+            prevBtn.addEventListener('click', function() {
+                currentIndex = (currentIndex - 1 + imageContainers.length) % imageContainers.length;
+                const path = imageContainers[currentIndex].dataset.path;
+                lightboxImg.src = `/image/${path}`;
+            });
+            
+            nextBtn.addEventListener('click', function() {
+                currentIndex = (currentIndex + 1) % imageContainers.length;
+                const path = imageContainers[currentIndex].dataset.path;
+                lightboxImg.src = `/image/${path}`;
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (lightbox.style.display === 'flex') {
+                    if (e.key === 'Escape') {
+                        lightbox.style.display = 'none';
+                    } else if (e.key === 'ArrowLeft') {
+                        prevBtn.click();
+                    } else if (e.key === 'ArrowRight') {
+                        nextBtn.click();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+    
