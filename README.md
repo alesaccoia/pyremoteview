@@ -4,7 +4,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyremoteview)](https://pypi.org/project/pyremoteview/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-PyRemoteView is a web-based application that allows you to remotely browse and view images stored locally or on another server via SSH, with automatic thumbnail generation and caching for improved performance.
+PyRemoteView is a web-based application that allows you to remotely browse and view images stored on another server via SSH, with automatic thumbnail generation and caching for improved performance.
 
 ## Features
 
@@ -72,10 +72,18 @@ For PyRemoteView to work properly, you need to set up passwordless SSH access to
 
 ## Usage
 
-### Basic Usage
+### After PyPI Installation
+
+If you installed PyRemoteView from PyPI, you can start it directly from the command line:
 
 ```
-python remote_gallery.py --remote-host linux02 --remote-path /path/to/images
+pyremoteview --remote-host remoteserver --remote-path /path/to/images
+```
+
+### If Installed from Source
+
+```
+python remote_gallery.py --remote-host remoteserver --remote-path /path/to/images
 ```
 
 ### Command Line Options
